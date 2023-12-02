@@ -1,15 +1,706 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Title",
-    "description": "Title",
-    "version": "1.0.0"
+    "title": "Tentang Anak - Pokedex API",
+    "version": "1.0.0",
+    "description": "Pokedex API Feature for Tentang Anak",
+    "contact": {
+      "email": "devvara@rishivian.dev"
+    }
   },
   "servers": [
     {
-      "url": "https"
+      "url": "https://localhost:2907/api/v1",
+      "description": "API Version 1"
     }
   ],
   "paths": {
+    "/monsters": {
+      "post": {
+        "summary": "Add Monster",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name of the monster"
+                  },
+                  "categoryName": {
+                    "type": "string",
+                    "description": "category name of the monster"
+                  },
+                  "typeIDs": {
+                    "type": "array",
+                    "description": "type ID of the monster, can more than one ID",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "description of the monster"
+                  },
+                  "height": {
+                    "type": "number",
+                    "description": "height of the monster"
+                  },
+                  "weight": {
+                    "type": "number",
+                    "description": "weight of the monster"
+                  },
+                  "stats": {
+                    "type": "object",
+                    "description": "stats of the monster, max total stats is 500",
+                    "properties": {
+                      "hp": {
+                        "type": "number"
+                      },
+                      "attack": {
+                        "type": "number"
+                      },
+                      "def": {
+                        "type": "number"
+                      },
+                      "speed": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "hp",
+                      "attack",
+                      "def",
+                      "speed"
+                    ]
+                  },
+                  "imagePath": {
+                    "type": "string",
+                    "description": "image path of the monster",
+                    "format": "uri"
+                  }
+                },
+                "required": [
+                  "name",
+                  "categoryName",
+                  "typeIDs",
+                  "description",
+                  "height",
+                  "weight",
+                  "stats"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "success add monster"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "undefined property",
+                  "errors": [
+                    "name is required"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "add monster not permitted"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List Monsters",
+        "parameters": [
+          {
+            "name": "options[catch]",
+            "in": "query",
+            "description": "monster catch option",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "caught",
+                "free"
+              ]
+            },
+            "required": false
+          },
+          {
+            "name": "name",
+            "description": "name of the monster",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "typeIDs",
+            "description": "type ID of the monster, can more than one ID",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "order",
+            "description": "order of the monster list. default is id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "name"
+              ]
+            }
+          },
+          {
+            "name": "sort",
+            "description": "order sort of the monster list. default is asc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "categoryName": {
+                            "type": "string"
+                          },
+                          "typeIDs": {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "height": {
+                            "type": "number"
+                          },
+                          "weight": {
+                            "type": "number"
+                          },
+                          "stats": {
+                            "type": "object",
+                            "properties": {
+                              "hp": {
+                                "type": "number"
+                              },
+                              "attack": {
+                                "type": "number"
+                              },
+                              "def": {
+                                "type": "number"
+                              },
+                              "speed": {
+                                "type": "number"
+                              }
+                            }
+                          },
+                          "imagePath": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "options": {
+                            "type": "object",
+                            "properties": {
+                              "isCaught": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "success fetch monsters",
+                  "data": [
+                    {
+                      "id": 1,
+                      "name": "Venomoth",
+                      "categoryName": "Pokémon Ngengat Beracun",
+                      "typeIDs": [
+                        1,
+                        2
+                      ],
+                      "description": "Terdapat sisik pada sayap Venomoth. Pokémon ini menyebarkan bubuk beracun tiap kali ia mengepakkan sayapnya.",
+                      "height": 1.5,
+                      "weight": 12.5,
+                      "stats": {
+                        "hp": 30,
+                        "attack": 100,
+                        "def": 50,
+                        "speed": 200
+                      },
+                      "imagePath": "https://id.portal-pokemon.com/play/resources/pokedex/img/pm/c57d464a64424f031a9872f2ec3f7c0b8052d3c1.png",
+                      "options": {
+                        "isCaught": false
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "bad property",
+                  "errors": [
+                    "order is must one of id, name",
+                    "sort is must one of asc, desc"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monsters/{id}": {
+      "get": {
+        "summary": "Detail Monster",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "success fetch monster",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "failed operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "no monster found with given id"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Monster",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name of the monster"
+                  },
+                  "categoryName": {
+                    "type": "string",
+                    "description": "category name of the monster"
+                  },
+                  "typeIDs": {
+                    "type": "array",
+                    "description": "type ID of the monster, can more than one ID",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "description of the monster"
+                  },
+                  "height": {
+                    "type": "number",
+                    "description": "height of the monster"
+                  },
+                  "weight": {
+                    "type": "number",
+                    "description": "weight of the monster"
+                  },
+                  "stats": {
+                    "type": "object",
+                    "description": "stats of the monster, max total stats is 500",
+                    "properties": {
+                      "hp": {
+                        "type": "number"
+                      },
+                      "attack": {
+                        "type": "number"
+                      },
+                      "def": {
+                        "type": "number"
+                      },
+                      "speed": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "imagePath": {
+                    "type": "string",
+                    "description": "image path of the monster",
+                    "format": "uri"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "success update monster"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "failed update monster",
+                  "errors": [
+                    "name is required"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "update monster not permitted"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "no monster found with given id"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Monster",
+        "responses": {
+          "204": {
+            "description": "successful operation"
+          },
+          "403": {
+            "description": "forbidden operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "delete monster not permitted"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "failed operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "no monster found with given id"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monsters/{id}/options": {
+      "patch": {
+        "summary": "Update Monster Options",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "isCaught": {
+                    "type": "boolean",
+                    "description": "flag to mark monster as caught or uncaught"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "success update monster flag"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "failed update monster flag",
+                  "errors": [
+                    "isCaught is required"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "update monster flag is not permitted"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "no monster found with given id"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
+
