@@ -7,6 +7,10 @@ type MonsterStat struct {
 	Speed  int
 }
 
+type MonsterOptions struct {
+	Catch string
+}
+
 type Monster struct {
 	ID           int
 	Name         string
@@ -21,3 +25,11 @@ type Monster struct {
 }
 
 type Monsters []Monster
+
+type FetchMonstersRequest struct {
+	Options MonsterOptions
+	Name    string
+	TypeIDs []int
+	Order   string
+	Sort    string
+}
