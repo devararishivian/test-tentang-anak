@@ -17,3 +17,10 @@ type StoreMonsterStatRequest struct {
 	Def    int `json:"def" validate:"required"`
 	Speed  int `json:"speed" validate:"required"`
 }
+
+type FetchMonsterRequest struct {
+	Name    string `json:"name"`
+	TypeIDs *[]int `json:"typeIDs"`
+	Order   string `json:"order" validate:"omitempty,oneof=id name"`
+	Sort    string `json:"sort" validate:"omitempty,oneof=asc desc"`
+}

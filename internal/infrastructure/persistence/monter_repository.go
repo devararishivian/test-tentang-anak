@@ -23,7 +23,8 @@ func NewMonsterRepository(db *infrastructure.Database) repository.MonsterReposit
 
 func (r *MonsterRepositoryImpl) Store(monster *entity.Monster) error {
 	var insertMonsterStmt = `INSERT INTO "monsters"(name, category_name, description, height, weight, stats, image_path) 
-							VALUES ($1, $2, $3, $4, $5, $6, $7)`
+							VALUES ($1, $2, $3, $4, $5, $6, $7)
+							RETURNING id`
 
 	monsterStatByte, err := json.Marshal(monster.Stats)
 	if err != nil {
@@ -32,7 +33,13 @@ func (r *MonsterRepositoryImpl) Store(monster *entity.Monster) error {
 
 	monsterStat := string(monsterStatByte)
 
-	_, err = r.db.Conn.Exec(
+	tx, err := r.db.Conn.Begin(context.Background())
+	if err != nil {
+		return err
+	}
+
+	var monsterID int
+	err = tx.QueryRow(
 		context.Background(),
 		insertMonsterStmt,
 		monster.Name,
@@ -42,41 +49,68 @@ func (r *MonsterRepositoryImpl) Store(monster *entity.Monster) error {
 		monster.Weight,
 		monsterStat,
 		monster.ImagePath,
-	)
+	).Scan(&monsterID)
 	if err != nil {
+		errRollback := tx.Rollback(context.Background())
+		if errRollback != nil {
+			return errRollback
+		}
 		return err
 	}
 
-	return nil
+	for _, typeID := range monster.TypeIDs {
+		_, errExec := tx.Exec(
+			context.Background(),
+			`INSERT INTO "monster_typeids" (monster_id, type_id) VALUES ($1, $2)`,
+			monsterID,
+			typeID,
+		)
+		if errExec != nil {
+			errRollback := tx.Rollback(context.Background())
+			if errRollback != nil {
+				return errRollback
+			}
+			return errExec
+		}
+	}
+
+	return tx.Commit(context.Background())
 }
 
 func (r *MonsterRepositoryImpl) Fetch(req *entity.FetchMonstersRequest) (result *entity.Monsters, err error) {
 	var (
 		selectMonsterStmt = `SELECT m.id, m.name, m.category_name, m.description, m.height, m.weight, m.stats, m.image_path 
                              FROM "monsters" AS m 
+                                 JOIN "monster_typeids" AS mt ON m.id = mt.monster_id 
                              WHERE 1=1`
 		params []any
 		order  = "id"
 		sort   = "ASC"
 	)
 
-	i := 1
+	i := 0
 	if req.Name != "" {
 		selectMonsterStmt += fmt.Sprintf(" AND m.name = $%d", i)
 		params = append(params, req.Name)
 		i++
 	}
 
-	if len(req.TypeIDs) > 0 {
-		selectMonsterStmt += ` JOIN "monster_typeids" AS mt ON m.id = mt.monster_id 
-                               WHERE mt.type_id IN(`
-		for _, id := range req.TypeIDs {
-			selectMonsterStmt += fmt.Sprintf("$%d,", i)
-			params = append(params, id)
-			i++
-		}
+	if req.TypeIDs != nil {
+		if len(*req.TypeIDs) > 0 {
+			for index, id := range *req.TypeIDs {
+				if id != 0 {
+					if index == 0 {
+						selectMonsterStmt += ` AND mt.type_id IN(`
+					}
+					selectMonsterStmt += fmt.Sprintf("$%d,", i)
+					params = append(params, id)
+					i++
 
-		selectMonsterStmt = strings.TrimRight(selectMonsterStmt, ",") + ")"
+					selectMonsterStmt = strings.TrimRight(selectMonsterStmt, ",") + ")"
+				}
+			}
+
+		}
 	}
 
 	if req.Order != "" {
@@ -97,7 +131,7 @@ func (r *MonsterRepositoryImpl) Fetch(req *entity.FetchMonstersRequest) (result 
 	}
 	defer rows.Close()
 
-	monsters := make([]*entity.Monster, 0)
+	monsters := make(entity.Monsters, 0)
 
 	for rows.Next() {
 		var monster entity.Monster
@@ -122,12 +156,12 @@ func (r *MonsterRepositoryImpl) Fetch(req *entity.FetchMonstersRequest) (result 
 			return nil, err
 		}
 
-		monsters = append(monsters, &monster)
+		monsters = append(monsters, monster)
 	}
 
 	if len(monsters) == 0 {
 		return nil, errors.New("no monsters found")
 	}
 
-	return result, nil
+	return &monsters, nil
 }

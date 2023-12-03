@@ -23,3 +23,12 @@ func (u *MonsterUseCaseImpl) Add(monster *entity.Monster) error {
 
 	return nil
 }
+
+func (u *MonsterUseCaseImpl) List(req *entity.FetchMonstersRequest) (*entity.Monsters, error) {
+	monsters, err := u.monsterRepository.Fetch(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return monsters, nil
+}

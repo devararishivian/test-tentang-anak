@@ -24,4 +24,5 @@ func registerMonsterRoutesV1(router fiber.Router, db *infrastructure.Database) {
 
 	route := router.Group("monsters")
 	route.Post("/", handler.Store)
+	route.Get("/", handler.Fetch)
 }
