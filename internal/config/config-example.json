@@ -4,7 +4,8 @@
     "password": "",
     "host": "localhost",
     "port": "5432",
-    "name": "database"
+    "name": "database",
+    "schema": "test_tentang_anak"
   },
   "server": {
     "address": ":2907"

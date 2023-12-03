@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"github.com/devararishivian/test-tentang-anak/internal/domain/entity"
 	"github.com/devararishivian/test-tentang-anak/internal/domain/repository"
 )
 
@@ -12,4 +13,13 @@ func NewMonsterUseCase(monsterRepository repository.MonsterRepository) *MonsterU
 	return &MonsterUseCaseImpl{
 		monsterRepository: monsterRepository,
 	}
+}
+
+func (u *MonsterUseCaseImpl) Add(monster *entity.Monster) error {
+	err := u.monsterRepository.Store(monster)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -20,10 +20,8 @@ func RegisterRoutes(router fiber.Router, db *infrastructure.Database) {
 func registerMonsterRoutesV1(router fiber.Router, db *infrastructure.Database) {
 	repository := persistence.NewMonsterRepository(db)
 	useCase := usecase.NewMonsterUseCase(repository)
-	_ = NewMonsterHandler(useCase)
+	handler := NewMonsterHandler(useCase)
 
 	route := router.Group("monsters")
-	route.Get("/health", func(ctx *fiber.Ctx) error {
-		return ctx.SendString("OK")
-	})
+	route.Post("/", handler.Store)
 }

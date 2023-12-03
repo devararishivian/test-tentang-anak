@@ -10,6 +10,7 @@ type database struct {
 	Host     string
 	Port     string
 	Name     string
+	Schema   string
 }
 
 type cache struct {

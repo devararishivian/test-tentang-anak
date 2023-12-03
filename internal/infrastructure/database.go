@@ -21,12 +21,13 @@ func NewDatabase() (*Database, error) {
 	// Create a new context for the connection
 	ctx := context.Background()
 
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?search_path=%s",
 		appConfig.Database.User,
 		appConfig.Database.Password,
 		appConfig.Database.Host,
 		appConfig.Database.Port,
 		appConfig.Database.Name,
+		appConfig.Database.Schema,
 	)
 
 	// Define the database configuration
